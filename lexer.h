@@ -1,24 +1,22 @@
 #ifndef __LEXER_H_
 #define __LEXER_H_
 
+#include "token.h"
+
 #include <list>
 #include <string>
 
-class scanner {
-  public:
-    explicit scanner(const std::string& srcName);
+class scanner;
 
-  private:
-    const std::string srcName;
-};
 
 class lexer {
   public:
     explicit lexer(const std::string& srcName);
+    std::string getNextToken();
 
   private:
-    scanner scaner;
-    std::list<std::string> tokSeq;
+    scanner *scaner;
+    std::list<tokenmap> toknSeq;
 };
 
 

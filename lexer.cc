@@ -1,6 +1,8 @@
 #include "lexer.h"
+#include "scanner.h"
 #include "token.h"
 #include "keyword.h"
+
 
 scanner::scanner(const std::string& srcName)
  :srcName(srcName) {
@@ -8,7 +10,7 @@ scanner::scanner(const std::string& srcName)
 }
 
 lexer::lexer(const std::string& srcName)
- :scaner(srcName) {
+ :scaner(new scanner(srcName)) {
   
 }
 
