@@ -25,43 +25,13 @@
                 Line655:        # 2 "hello.c" 2
   *****************************************************/
 static void ScanPPLine(void) {
-    int line = 0;
-    CURSOR++;
-    while (*CURSOR == ' ' || *CURSOR == '\t') {
-        CURSOR++;
-    }
-    // # 2 "hello.c" 2              on Linux
-    if (IsDigit(*CURSOR)) {
-        goto read_line;
-    }
-    // # line 6 "C:\\Program Files\\Visual Stduio 6\\VC6\\Include\\stdio.h"         on Windows
-    else if (strncmp(CURSOR, "line", 4) == 0) {
-        CURSOR += 4;
-        while (*CURSOR == ' ' || *CURSOR == '\t') {
-                        CURSOR++;
-        }
-    read_line:
-        // line number
-        while (IsDigit(*CURSOR)) {
-            line = 10 * line + *CURSOR - '0';
-            CURSOR++;
-        }
-        TokenCoord.ppline = line - 1;
-        // skip white space
-        while (*CURSOR == ' ' || *CURSOR == '\t') {
-            CURSOR++;
-        }
-        TokenCoord.filename = InternName(TokenCoord.filename, (char *)CURSOR - TokenCoord.filename);
-    }
-    while (*CURSOR != '\n' && !IS_EOF(CURSOR)) {
-        CURSOR++;
-    }
+
 }
  
 
 scanner::scanner(const std::string& srcName)
  :srcName(srcName) {
-    for(int i=0; i<255; i++) {
+    for(int i=0; i<256; i++) {
         if(IsLetter(i)) {
             scaners[i] = ScanIdentifier;
         } else if (IsDigit(i)) {

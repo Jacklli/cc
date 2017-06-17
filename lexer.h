@@ -7,6 +7,7 @@
 #include <string>
 
 class scanner;
+class tokenmap;
 
 
 class lexer {

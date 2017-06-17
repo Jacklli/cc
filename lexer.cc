@@ -1,7 +1,7 @@
 #include "lexer.h"
 #include "scanner.h"
 #include "token.h"
-#include "keyword.h"
+#include "keywords.h"
 
 
 scanner::scanner(const std::string& srcName)

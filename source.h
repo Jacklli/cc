@@ -4,19 +4,18 @@
 
 class source {
   public:
+
   private:
-// static information while parsing
+    // static information
     std::string filename;
-    unsigned char *base;
+    unsigned char *base;        // points to heap memory for the file.
     unsigned char *cursor;
     unsigned char *lineHead;
-    lin line;
-    void *fileMapping;
     unsigned long size;
     
-// dynamic information while parsing
-    int ppline;
-    int line;
+    // dynamic information
+    int ppline; // line number in *.c
+    int line;   // line number in *.i
     int col;
 };
 
