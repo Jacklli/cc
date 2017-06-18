@@ -1,24 +1,80 @@
-#ifndef __LEXER_H_
-#define __LEXER_H_
+#ifndef __SCANNER_H_
+#define __SCANNER_H_
 
 #include "token.h"
-#include "scanner.h"
-#include "source.h"
-
-#include <list>
 #include <string>
 
+#define END_OF_FILE 255
+
+#define isDigit(c)         (c >= '0' && c <= '9')
+#define isOctDigit(c)      (c >= '0' && c <= '7')
+#define isHexDigit(c)      (isDigit(c) || (c >= 'A' && c <= 'F') || (c >= 'a' && c <= 'f'))
+#define isLetter(c)        ((c >= 'a' && c <= 'z') || (c == '_') || (c >= 'A' && c <= 'Z'))
+#define isLetterOrDigit(c) (isLetter(c) || isDigit(c))
+#define toUpper(c)                 (c & ~0x20)
+#define HIGH_4BIT(v)       ((v) >> (8 * sizeof(int) - 4) & 0x0f)
+#define HIGH_3BIT(v)       ((v) >> (8 * sizeof(int) - 3) & 0x07)
+#define HIGH_1BIT(v)       ((v) >> (8 * sizeof(int) - 1) & 0x01)
+
+typedef tokenMap *(*scanner)();
 
 class lexer {
   public:
-    explicit lexer(const std::string& srcName);
-    tokenMap *getNextToken();    // this function combines three classes: "scanner, source, tokCoord"
+    explicit lexer(std::string& srcName);
+    tokenMap *getNextToken();
 
   private:
-    scanner scaner;
-    source src;
-    tokCoord coord;
-};
+    tokenMap *scanEOF();
+    tokenMap *scanCharLiteral();
+    tokenMap *scanStringLiteral();
+    
+    tokenMap *scanIdentifier();
 
+    tokenMap *scanPlus();
+    tokenMap *scanMinus();
+    tokenMap *scanStar();
+    tokenMap *scanSlash();
+    tokenMap *scanPercent();
+    tokenMap *scanLess();
+    tokenMap *scanGreat();
+    tokenMap *scanExclamation();
+    tokenMap *scanEqual();
+    tokenMap *scanBar();
+    tokenMap *scanAmpersand();
+    tokenMap *scanCaret();
+    tokenMap *scanDot();
+
+    tokenMap *scanLBRACE();
+    tokenMap *scanRBRACE();
+    tokenMap *scanLBRACKET();
+    tokenMap *scanRBRACKET();
+    tokenMap *scanLPAREN();
+    tokenMap *scanRPAREN();
+    tokenMap *scanCOMMA();
+    tokenMap *scanSEMICOLON();
+    tokenMap *scanCOMP();
+    tokenMap *scanQUESTION();
+    tokenMap *scanCOLON();
+
+    tokenMap *scanIdentifier();
+    tokenMap *scanPlus();
+    tokenMap *scanStringLiteral();
+    tokenMap *scanNumericLiteral();
+    tokenMap *scanBadChar();
+    
+    scanner scaners[256];
+
+    // source file contents related
+    unsigned char *fetchContent();
+    std::string *srcName;
+    unsigned char *base;
+    unsigned char *cursor;
+
+    // coordination details
+    tokenMap *tokmap;
+    unsigned int ppline;
+    unsigned int line;
+    unsigned int col;
+};
 
 #endif
