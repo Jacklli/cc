@@ -2,22 +2,22 @@
 #define __LEXER_H_
 
 #include "token.h"
+#include "scanner.h"
+#include "source.h"
 
 #include <list>
 #include <string>
-
-class scanner;
-class tokenmap;
 
 
 class lexer {
   public:
     explicit lexer(const std::string& srcName);
-    std::string getNextToken();
+    tokenMap *getNextToken();    // this function combines three classes: "scanner, source, tokCoord"
 
   private:
-    scanner *scaner;
-    std::list<tokenmap> toknSeq;
+    scanner scaner;
+    source src;
+    tokCoord coord;
 };
 
 

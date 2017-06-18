@@ -6,16 +6,6 @@
 
 #define END_OF_FILE 255
 
-struct tokenMap {
-  token tokn;
-  union value {
-    int i[2];
-    float f;
-    double d;
-    std::string *p;
-  };
-};
-
 #define isDigit(c)         (c >= '0' && c <= '9')
 #define isOctDigit(c)      (c >= '0' && c <= '7')
 #define isHexDigit(c)      (isDigit(c) || (c >= 'A' && c <= 'F') || (c >= 'a' && c <= 'f'))
@@ -30,7 +20,7 @@ typedef tokenMap *(*scanner)(void);
 
 class scanner {
   public:
-    explicit scanner(const std::string& srcName);
+    explicit scanner();
     scanner scaners[256];
 
   private:
