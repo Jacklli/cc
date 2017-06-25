@@ -1,8 +1,14 @@
 
 #include "lexer.h"
 
-lexer::lexer() {
-    for (int i=0; i<256; i++) {
+lexer::lexer(std::string& srcName)
+ :srcName(srcName) {
+    setUpLexer();
+}
+
+
+bool lexer::setUpLexer() {
+    for (int i=0; i<ALL_CHAR_NUMBER; i++) {
         if(isLetter(i)) {
             scaners[i] = scanIdentifier;
         } else if (isDigit(i)) {

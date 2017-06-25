@@ -181,6 +181,6 @@ static struct keyword keywords[] = {
     {"volatile", 8, TK_VOLATILE},
 
     {"while", 5, TK_WHILE }
-}
+};
 
 #endif

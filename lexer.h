@@ -5,6 +5,7 @@
 #include <string>
 
 #define END_OF_FILE 255
+#define ALL_CHAR_NUMBER 256
 
 #define isDigit(c)         (c >= '0' && c <= '9')
 #define isOctDigit(c)      (c >= '0' && c <= '7')
@@ -24,6 +25,7 @@ class lexer {
     tokenMap *getNextToken();
 
   private:
+    bool setUpLexer();
     tokenMap *scanEOF();
     tokenMap *scanCharLiteral();
     tokenMap *scanStringLiteral();
@@ -56,13 +58,10 @@ class lexer {
     tokenMap *scanQUESTION();
     tokenMap *scanCOLON();
 
-    tokenMap *scanIdentifier();
-    tokenMap *scanPlus();
-    tokenMap *scanStringLiteral();
     tokenMap *scanNumericLiteral();
     tokenMap *scanBadChar();
     
-    scanner scaners[256];
+    scanner scaners[ALL_CHAR_NUMBER];
 
     // source file contents related
     unsigned char *fetchContent();
