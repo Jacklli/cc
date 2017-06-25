@@ -1,4 +1,4 @@
-TARGET=mycc
+TARGET = mycc
 CC = g++
 SRCS = $(wildcard *.cc)
 OBJS = $(SRCS:.cc = .o)
@@ -13,4 +13,4 @@ $(TARGET) : $(OBJS)
 	$(CC) $(CXXFLAGS) -o $@ -c $<
 
 clean:
-	rm *.o $(TARGET)
+	rm -rf *.o $(TARGET)

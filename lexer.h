@@ -23,10 +23,14 @@ typedef std::function <tokenMap* ()> scanner;
 class lexer {
   public:
     explicit lexer(std::string& srcName);
+    ~lexer();
     tokenMap *getNextToken();
 
   private:
     bool setUpLexer();
+
+    int findKeyword(char *str, int len);
+
     tokenMap *scanEOF();
     tokenMap *scanCharLiteral();
     tokenMap *scanStringLiteral();
@@ -65,10 +69,11 @@ class lexer {
     scanner scaners[ALL_CHAR_NUMBER];
 
     // source file contents related
-    unsigned char *fetchContent();
+    bool fetchContent();
     std::string srcName;
-    unsigned char *base;
-    unsigned char *cursor;
+    char *base;
+    unsigned long size;
+    char *cursor;
 
     // coordination details
     tokenMap *tokmap;

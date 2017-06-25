@@ -1,16 +1,24 @@
 
 #include "lexer.h"
+#include <iostream>
+#include <fstream>
 
 lexer::lexer(std::string& srcName)
  :srcName(srcName) {
     setUpLexer();
+    fetchContent();
+}
+
+lexer::~lexer() {
+    delete []base;
 }
 
 bool lexer::setUpLexer() {
     for (int i=0; i<ALL_CHAR_NUMBER; i++) {
         if(isLetter(i)) {
             //scaners[i] = scanIdentifier;
-            scaners[i] = std::bind(&lexer::scanIdentifier, this); } else if (isDigit(i)) {
+            scaners[i] = std::bind(&lexer::scanIdentifier, this); 
+        } else if (isDigit(i)) {
             scaners[i] = std::bind(&lexer::scanNumericLiteral, this);
         } else {
             scaners[i] = std::bind(&lexer::scanBadChar, this);
@@ -48,9 +56,45 @@ bool lexer::setUpLexer() {
     return true;
 }
 
+bool lexer::fetchContent() {
+    std::filebuf *pbuf = NULL;
+    std::ifstream filestr;
+    base = NULL, size = 0;  // data member of class lexer
+    filestr.open(srcName, std::ios::binary);
+    pbuf = filestr.rdbuf();
+
+    size = pbuf->pubseekoff(0, std::ios::end, std::ios::in);
+    pbuf->pubseekpos(0, std::ios::in);
+    base = new char[size];
+    pbuf->sgetn(base, size);
+    cursor = base;
+    filestr.close();
+
+//    std::cout.write(base, size);
+    return true;
+}
+
+// return keyword or TK_ID
+int findKeyword(char *str, int len) {
+    struct keyword *p = NULL;
+    //index is 0 when "__int64", see keyword.h      static struct keyword keywords_[]
+    int index = 0;
+
+    if (*str != '_')
+        index = toUpper(*str) - 'A' + 1;
+
+    p = &keywords[index];
+    while (p->name) {
+        if (p->len == len && strncmp(str, p->name, len) == 0)
+            break;
+	p++;
+    }
+    return p->tok;
+}
+
 tokenMap *lexer::scanIdentifier() {
     unsigned int tok = 0;
-    unsigned char *start = cursor;
+    char *start = cursor;
     tokenMap *tkMap;
 
     if (*cursor == 'L') {     // special case :  wide char/string
@@ -61,7 +105,7 @@ tokenMap *lexer::scanIdentifier() {
             return scanStringLiteral();     // L"wide string"
         }
     }
-    // lettter(letter|digit)*
+    // letter(letter|digit)*
     cursor++;
     while (isLetterOrDigit(*cursor)) {
         cursor++;
@@ -69,8 +113,10 @@ tokenMap *lexer::scanIdentifier() {
 
     tok = findKeyword((char *)start, (int)(cursor - start));
     if (tok == TK_ID) {
-        tkMap->value.p = InternName((char *)start, (int)(cursor - start));
+        tkMap->value.p = new std::string(start, static_cast<int>(cursor - start));
     }
 
     return tkMap;
 }
+
+

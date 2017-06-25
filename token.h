@@ -135,7 +135,7 @@ struct keyword {
     int tok;
 };
 
-static struct keyword keywords[] = {
+struct keyword keywords[] = {
     {"__int64",  0, TK_INT64},
 
     {"auto",     4, TK_AUTO},
