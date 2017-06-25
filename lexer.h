@@ -8,6 +8,8 @@
 #define END_OF_FILE 255
 #define ALL_CHAR_NUMBER 256
 
+#define	IS_EOF(cur)	   (static_cast<int>(*(cur)) == END_OF_FILE && ((cur) - base) == size)
+
 #define isDigit(c)         (c >= '0' && c <= '9')
 #define isOctDigit(c)      (c >= '0' && c <= '7')
 #define isHexDigit(c)      (isDigit(c) || (c >= 'A' && c <= 'F') || (c >= 'a' && c <= 'f'))
@@ -18,53 +20,54 @@
 #define HIGH_3BIT(v)       ((v) >> (8 * sizeof(int) - 3) & 0x07)
 #define HIGH_1BIT(v)       ((v) >> (8 * sizeof(int) - 1) & 0x01)
 
-typedef std::function <tokenMap* ()> scanner;
+typedef std::function <bool ()> scanner;
 
 class lexer {
   public:
     explicit lexer(std::string& srcName);
     ~lexer();
-    tokenMap *getNextToken();
+    bool getNextToken();
 
   private:
     bool setUpLexer();
 
     int findKeyword(char *str, int len);
 
-    tokenMap *scanEOF();
-    tokenMap *scanCharLiteral();
-    tokenMap *scanStringLiteral();
+    int scanEscapeChar(int wide);
+    bool scanEOF();
+    bool scanCharLiteral();
+    bool scanStringLiteral();
     
-    tokenMap *scanIdentifier();
+    bool scanIdentifier();
 
-    tokenMap *scanPlus();
-    tokenMap *scanMinus();
-    tokenMap *scanStar();
-    tokenMap *scanSlash();
-    tokenMap *scanPercent();
-    tokenMap *scanLess();
-    tokenMap *scanGreat();
-    tokenMap *scanExclamation();
-    tokenMap *scanEqual();
-    tokenMap *scanBar();
-    tokenMap *scanAmpersand();
-    tokenMap *scanCaret();
-    tokenMap *scanDot();
+    bool scanPlus();
+    bool scanMinus();
+    bool scanStar();
+    bool scanSlash();
+    bool scanPercent();
+    bool scanLess();
+    bool scanGreat();
+    bool scanExclamation();
+    bool scanEqual();
+    bool scanBar();
+    bool scanAmpersand();
+    bool scanCaret();
+    bool scanDot();
 
-    tokenMap *scanLBRACE();
-    tokenMap *scanRBRACE();
-    tokenMap *scanLBRACKET();
-    tokenMap *scanRBRACKET();
-    tokenMap *scanLPAREN();
-    tokenMap *scanRPAREN();
-    tokenMap *scanCOMMA();
-    tokenMap *scanSEMICOLON();
-    tokenMap *scanCOMP();
-    tokenMap *scanQUESTION();
-    tokenMap *scanCOLON();
+    bool scanLBRACE();
+    bool scanRBRACE();
+    bool scanLBRACKET();
+    bool scanRBRACKET();
+    bool scanLPAREN();
+    bool scanRPAREN();
+    bool scanCOMMA();
+    bool scanSEMICOLON();
+    bool scanCOMP();
+    bool scanQUESTION();
+    bool scanCOLON();
 
-    tokenMap *scanNumericLiteral();
-    tokenMap *scanBadChar();
+    bool scanNumericLiteral();
+    bool scanBadChar();
     
     scanner scaners[ALL_CHAR_NUMBER];
 
@@ -76,7 +79,7 @@ class lexer {
     char *cursor;
 
     // coordination details
-    tokenMap *tokmap;
+    tokenMap tokMap;
     unsigned int ppline;
     unsigned int line;
     unsigned int col;
