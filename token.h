@@ -117,14 +117,16 @@ typedef enum token {
     TK_END,		     // "EOF"
 } token;
 
-struct tokenMap {
-  token tokn;
-  union value {
+typedef union Value {
     int i[2];
     float f;
     double d;
     std::string *p;
-  };
+} Value;
+
+struct tokenMap {
+  token tokn;
+  Value value;
 };
 
 struct keyword {

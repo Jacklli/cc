@@ -3,6 +3,7 @@
 
 #include "token.h"
 #include <string>
+#include <functional>
 
 #define END_OF_FILE 255
 #define ALL_CHAR_NUMBER 256
@@ -17,7 +18,7 @@
 #define HIGH_3BIT(v)       ((v) >> (8 * sizeof(int) - 3) & 0x07)
 #define HIGH_1BIT(v)       ((v) >> (8 * sizeof(int) - 1) & 0x01)
 
-typedef tokenMap *(*scanner)();
+typedef std::function <tokenMap* ()> scanner;
 
 class lexer {
   public:
@@ -65,7 +66,7 @@ class lexer {
 
     // source file contents related
     unsigned char *fetchContent();
-    std::string *srcName;
+    std::string srcName;
     unsigned char *base;
     unsigned char *cursor;
 
