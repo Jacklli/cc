@@ -1,11 +1,6 @@
 #ifndef __LEX_H_
 #define __LEX_H_
 
-/***********************************
- *  * token.h:
- *   *         TOKEN(TK_TYPEDEF,   "typedef")
- *    *         TOKEN(TK_CONST,     "const")
- *     ***********************************/
 
 const char* TokenStrings[] =
 {
@@ -14,12 +9,6 @@ const char* TokenStrings[] =
 #undef  TOKEN
 };
 
-/*************************************
- *  token.h:
- *           TOKEN(TK_TYPEDEF,       "typedef")
- *                    TOKEN(TK_CONST,         "const")
- *                    Token Type       
- *                     *************************************/
 enum token
 {
         TK_BEGIN,
@@ -49,6 +38,9 @@ union value
 #define HIGH_1BIT(v)       ((v) >> (8 * sizeof(int) - 1) & 0x01)
 
 
+typedef int (*Scanner)(void);
+
+
 class Lexer() {
 
   public:
@@ -58,6 +50,36 @@ class Lexer() {
       void EndPeekToken(void);
       int  GetNextToken(void);
 
+  private:
+      void ScanPPLine(void);
+      int SkipWin32Declares(void);
+      void SkipWhiteSpace(void);
+      int ScanEscapeChar(int wide);
+      int FindKeyword(char *str, int len);
+      int ScanIntLiteral(unsigned char *start, int len, int base);
+      int ScanFloatLiteral(unsigned char *start);
+      int ScanNumericLiteral(void);
+      int ScanCharLiteral(void);
+      int ScanStringLiteral(void);
+      int ScanIdentifier(void);
+      int ScanPlus(void);
+      int ScanMinus(void);
+      int ScanStar(void);
+      int ScanSlash(void);
+      int ScanPercent(void);
+      int ScanLess(void);
+      int ScanGreat(void);
+      int ScanExclamation(void);
+      int ScanEqual(void);
+      int ScanBar(void);
+      int ScanAmpersand(void);
+      int ScanCaret(void);
+      int ScanDot(void);
+      int ScanBadChar(void);
+      int ScanEOF(void);
+      
+      Scanner Scanners[256];
+      unsigned char *CURSOR;
 }
 
 /*
