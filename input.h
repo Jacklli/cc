@@ -1,35 +1,32 @@
 #ifndef __INPUT_H_
 #define __INPUT_H_
 
+#include <stdio.h>
+
 // coordinate
-typedef struct coord
-{
-        char *filename;
-        int ppline;                     // see function ScanPPLine(void), the line number in *.c or other current included file
-        int line;                       // the line number in the original *.i
-        int col;                        // column 
+typedef struct coord {
+    char *filename;
+    int ppline;               // see function ScanPPLine(void), the line number in *.c or other current included file
+    int line;                 // the line number in the original *.i
+    int col;                  // column 
 } *Coord;
 
-class Input {
+// information abount input file
+struct input {
+    char *filename;
+    unsigned char *base;    // points to heap memory for the file.
+    unsigned char *cursor;
+    unsigned char *lineHead;
+    int line;
+    FILE* file;             // file handle returned by  fopen() / CreateFileA() / open()
+    unsigned long size;     // file size
+};
 
-  public:
-      Input();
-      void ReadSourceFile();
-      void CloseSourceFile(void);
+extern unsigned char END_OF_FILE;
+extern struct input Input;
 
-  private:
-      char *filename;
-      unsigned char *base;    // points to heap memory for the file.
-      unsigned char *cursor;
-      unsigned char *lineHead;
-      int line;
-      void* file;             // file handle returned by  fopen() / CreateFileA() / open()
-      void* fileMapping;      // handle returned by CreateFileMapping() on Win32
-      unsigned long size;     // file size
-
-}
-
-
+void ReadSourceFile(char *fileName);
+void FreeSource(void);
 
 
 
