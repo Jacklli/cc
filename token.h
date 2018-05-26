@@ -1,188 +1,108 @@
-#ifndef __TOKEN_H_
-#define __TOKEN_H_
-
-#include <stddef.h>
-#include <string>
-
-/* 
-*  all tokens including keywords, identifiers, constant, operators, punctuators
-*/
-
-typedef enum token {
-    TK_BEGIN,
-
-    //keywords
-    TK_AUTO,		     // "auto"
-    TK_EXTERN,		     // "extern"
-    TK_REGISTER,	     // "register"
-    TK_STATIC,		     // "static"
-    TK_TYPEDEF,		     // "typedef"
-    TK_CONST,		     //	"const"
-    TK_VOLATILE,	     //	"volatile"
-    TK_SIGNED,		     //	"signed"
-    TK_UNSIGNED,	     //	"unsigned"
-    TK_SHORT,		     //	"short"
-    TK_LONG,		     //	"long"
-    TK_CHAR,		     //	"char"
-    TK_INT,		     //	"int"
-    TK_INT64,		     //	"__int64"
-    TK_FLOAT,		     //	"float"
-    TK_DOUBLE,		     //	"double"
-    TK_ENUM,		     //	"enum"
-    TK_STRUCT,		     //	"struct"
-    TK_UNION,		     //	"union"
-    TK_VOID,		     //	"void"
-    TK_BREAK,		     //	"break"
-    TK_CASE,		     //	"case"
-    TK_CONTINUE,	     //	"continue"
-    TK_DEFAULT,		     //	"default"
-    TK_DO,		     //	"do"
-    TK_ELSE,		     //	"else"
-    TK_FOR,		     //	"for"
-    TK_GOTO,		     //	"goto"
-    TK_IF,		     //	"if"
-    TK_RETURN,		     //	"return"
-    TK_SWITCH,		     //	"switch"
-    TK_WHILE,		     //	"while"
-    TK_SIZEOF,		     //	"sizeof"
-
-    //identifier
-    TK_ID,		     //	"ID"
-
-    //constant
-    TK_INTCONST,	     //	"int"
-    TK_UINTCONST,	     //	"unsigned int"
-    TK_LONGCONST,	     //	"long"
-    TK_ULONGCONST,	     //	"unsigned long"
-    TK_LLONGCONST,	     //	"long long"
-    TK_ULLONGCONST,	     //	"unsigned long long"
-    TK_FLOATCONST,	     //	"float"
-    TK_DOUBLECONST,	     //	"double"
-    TK_LDOUBLECONST,	     //	"long double"
-    TK_STRING,		     //	"STR"
-    TK_WIDESTRING,	     //	"WSTR"
-
-    //operators
-    TK_COMMA,		     // ","
-    TK_QUESTION,	     // "?"
-    TK_COLON,		     // ":"
-    TK_ASSIGN,		     // "="
-    TK_BITOR_ASSIGN,	     // "|="
-    TK_BITXOR_ASSIGN,	     // "^="
-    TK_BITAND_ASSIGN,	     // "&="
-    TK_LSHIFT_ASSIGN,	     // "<<="
-    TK_RSHIFT_ASSIGN,	     // ">>="
-    TK_ADD_ASSIGN,	     // "+="
-    TK_SUB_ASSIGN,	     // "-="
-    TK_MUL_ASSIGN,	     // "*="
-    TK_DIV_ASSIGN,	     // "/="
-    TK_MOD_ASSIGN,	     // "%="
-    TK_OR,		     // "||"
-    TK_AND,		     // "&&"
-    TK_BITOR,		     // "|"
-    TK_BITXOR,		     // "^"
-    TK_BITAND,		     // "&"
-    TK_EQUAL,		     // "=="
-    TK_UNEQUAL,		     // "!="
-    TK_GREAT,		     // ">"
-    TK_LESS,		     // "<"
-    TK_GREAT_EQ,	     // ">="
-    TK_LESS_EQ,		     // "<="
-    TK_LSHIFT,		     // "<<"
-    TK_RSHIFT,		     // ">>"
-    TK_ADD,		     // "+"
-    TK_SUB,		     // "-"
-    TK_MUL,		     // "*"
-    TK_DIV,		     // "/"
-    TK_MOD,		     // "%"
-    TK_INC,		     // "++"
-    TK_DEC,		     // "--"
-    TK_NOT,		     // "!"
-    TK_COMP,		     // "~"
-    TK_DOT,		     // "."
-    TK_POINTER,		     // "->"
-    TK_LPAREN,		     // "("
-    TK_RPAREN,		     // ""
-    TK_LBRACKET,	     // "["
-    TK_RBRACKET,	     // "]"
-
-    //punctuators
-    TK_LBRACE,		     // "{"
-    TK_RBRACE,		     // "}"
-    TK_SEMICOLON,	     // ";"
-    TK_ELLIPSIS,	     //  "..."
-    TK_POUND,		     // "#"
-    TK_NEWLINE,		     // "\n"
-
-    TK_END,		     // "EOF"
-} token;
-
-typedef union Value {
-    int i[2];
-    float f;
-    double d;
-    std::string *p;
-} Value;
-
-struct tokenMap {
-  token tokn;
-  Value value;
-};
-
-struct keyword {
-    const char *name;
-    int len;
-    int tok;
-};
-
-struct keyword keywords[] = {
-    {"__int64",  0, TK_INT64},
-
-    {"auto",     4, TK_AUTO},
-
-    {"break",    5, TK_BREAK},
-
-    {"case",     4, TK_CASE},
-    {"char",     4, TK_CHAR},
-    {"const",    5, TK_CONST},
-    {"continue", 8, TK_CONTINUE},
-
-    {"default",  7, TK_DEFAULT},
-    {"do",       2, TK_DO},
-    {"double",   6, TK_DOUBLE},
-
-    {"else",     4, TK_ELSE},
-    {"enum",     4, TK_ENUM},
-    {"extern",   6, TK_EXTERN},
-
-    {"float",    5, TK_FLOAT},
-    {"for",      3, TK_FOR},
-    {"goto",     4, TK_GOTO},
-
-    {"if",       2, TK_IF},
-    {"int",      3, TK_INT},
-
-    {"long",     4, TK_LONG},
-
-    {"register", 8, TK_REGISTER},
-    {"return",   6, TK_RETURN},
-
-    {"short",    5, TK_SHORT},
-    {"signed",   6, TK_SIGNED},
-    {"sizeof",   6, TK_SIZEOF},
-    {"static",   6, TK_STATIC},
-    {"struct",   6, TK_STRUCT},
-    {"switch",   6, TK_SWITCH},
-
-    {"typedef",  7, TK_TYPEDEF},
-
-    {"union",    5, TK_UNION},
-    {"unsigned", 8, TK_UNSIGNED},
-
-    {"void",     4, TK_VOID},
-    {"volatile", 8, TK_VOLATILE},
-
-    {"while", 5, TK_WHILE }
-};
-
+#ifndef TOKEN
+#error "You must define TOKEN macro before include this file"
 #endif
+
+//keywords
+TOKEN(TK_AUTO,      "auto")
+TOKEN(TK_EXTERN,    "extern")
+TOKEN(TK_REGISTER,  "register")
+TOKEN(TK_STATIC,    "static")
+TOKEN(TK_TYPEDEF,   "typedef")
+TOKEN(TK_CONST,     "const")
+TOKEN(TK_VOLATILE,  "volatile")
+TOKEN(TK_SIGNED,    "signed")
+TOKEN(TK_UNSIGNED,  "unsigned")
+TOKEN(TK_SHORT,     "short")
+TOKEN(TK_LONG,      "long")
+TOKEN(TK_CHAR,      "char")
+TOKEN(TK_INT,       "int")
+TOKEN(TK_INT64,     "__int64")
+TOKEN(TK_FLOAT,     "float")
+TOKEN(TK_DOUBLE,    "double")
+TOKEN(TK_ENUM,      "enum")
+TOKEN(TK_STRUCT,    "struct")
+TOKEN(TK_UNION,     "union")
+TOKEN(TK_VOID,      "void")
+TOKEN(TK_BREAK,     "break")
+TOKEN(TK_CASE,      "case")
+TOKEN(TK_CONTINUE,  "continue")
+TOKEN(TK_DEFAULT,   "default")
+TOKEN(TK_DO,        "do")
+TOKEN(TK_ELSE,      "else")
+TOKEN(TK_FOR,       "for")
+TOKEN(TK_GOTO,      "goto")
+TOKEN(TK_IF,        "if")
+TOKEN(TK_RETURN,    "return")
+TOKEN(TK_SWITCH,    "switch")
+TOKEN(TK_WHILE,     "while")
+TOKEN(TK_SIZEOF,    "sizeof")
+
+//identifier
+TOKEN(TK_ID,        "ID")
+
+//constant
+TOKEN(TK_INTCONST,     "int")
+TOKEN(TK_UINTCONST,    "unsigned int")
+TOKEN(TK_LONGCONST,    "long")
+TOKEN(TK_ULONGCONST,   "unsigned long")
+TOKEN(TK_LLONGCONST,   "long long")
+TOKEN(TK_ULLONGCONST,  "unsigned long long")
+TOKEN(TK_FLOATCONST,   "float")
+TOKEN(TK_DOUBLECONST,  "double")
+TOKEN(TK_LDOUBLECONST, "long double")
+TOKEN(TK_STRING,       "STR")
+TOKEN(TK_WIDESTRING,   "WSTR")
+
+//operators
+TOKEN(TK_COMMA,         ",")
+TOKEN(TK_QUESTION,      "?")
+TOKEN(TK_COLON,         ":")
+TOKEN(TK_ASSIGN,        "=")
+TOKEN(TK_BITOR_ASSIGN,  "|=")
+TOKEN(TK_BITXOR_ASSIGN, "^=")
+TOKEN(TK_BITAND_ASSIGN, "&=")
+TOKEN(TK_LSHIFT_ASSIGN, "<<=")
+TOKEN(TK_RSHIFT_ASSIGN, ">>=")
+TOKEN(TK_ADD_ASSIGN,    "+=")
+TOKEN(TK_SUB_ASSIGN,    "-=")
+TOKEN(TK_MUL_ASSIGN,    "*=")
+TOKEN(TK_DIV_ASSIGN,    "/=")
+TOKEN(TK_MOD_ASSIGN,    "%=")
+TOKEN(TK_OR,            "||")
+TOKEN(TK_AND,           "&&")
+TOKEN(TK_BITOR,         "|")
+TOKEN(TK_BITXOR,        "^")
+TOKEN(TK_BITAND,        "&")
+TOKEN(TK_EQUAL,         "==")
+TOKEN(TK_UNEQUAL,       "!=")
+TOKEN(TK_GREAT,         ">")
+TOKEN(TK_LESS,          "<")
+TOKEN(TK_GREAT_EQ,      ">=")
+TOKEN(TK_LESS_EQ,       "<=")
+TOKEN(TK_LSHIFT,        "<<")
+TOKEN(TK_RSHIFT,        ">>")
+TOKEN(TK_ADD,           "+")
+TOKEN(TK_SUB,           "-")
+TOKEN(TK_MUL,           "*")
+TOKEN(TK_DIV,           "/")
+TOKEN(TK_MOD,           "%")
+TOKEN(TK_INC,           "++")
+TOKEN(TK_DEC,           "--")
+TOKEN(TK_NOT,           "!")
+TOKEN(TK_COMP,          "~")
+TOKEN(TK_DOT,           ".")
+TOKEN(TK_POINTER,       "->")
+TOKEN(TK_LPAREN,        "(")
+TOKEN(TK_RPAREN,        ")")
+TOKEN(TK_LBRACKET,      "[")
+TOKEN(TK_RBRACKET,      "]")
+
+//punctuators
+TOKEN(TK_LBRACE,        "{")
+TOKEN(TK_RBRACE,        "}")
+TOKEN(TK_SEMICOLON,     ";")
+TOKEN(TK_ELLIPSIS,       "...")
+TOKEN(TK_POUND,         "#")
+TOKEN(TK_NEWLINE,       "\n")
+
+TOKEN(TK_END,           "EOF")

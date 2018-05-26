@@ -1,16 +1,13 @@
-TARGET = mycc
+TARGET = cc
 CC = g++
 SRCS = $(wildcard *.cc)
 OBJS = $(SRCS:.cc = .o)
 INCLUDES = -I .
-LIBS = -L .
 CXXFLAGS = -std=c++11 -g -O0
 
-$(TARGET) : $(OBJS)
-	$(CC) $(CXXFLAGS) $^ -o $@ $(INCLUDES) $(LIBS)
+all: $(OBJS)
+	$(CC) $(CXXFLAGS) $^ -o ${TARGET} $(INCLUDES)
 
-%.o : %.cc
-	$(CC) $(CXXFLAGS) -o $@ -c $<
 
 clean:
 	rm -rf *.o $(TARGET)
