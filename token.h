@@ -1,3 +1,7 @@
+
+
+
+
 #ifndef TOKEN
 #error "You must define TOKEN macro before include this file"
 #endif
@@ -106,3 +110,4 @@ TOKEN(TK_POUND,         "#")
 TOKEN(TK_NEWLINE,       "\n")
 
 TOKEN(TK_END,           "EOF")
+
