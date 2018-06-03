@@ -433,3 +433,147 @@ int Lexer::ScanFloatLiteral(unsigned char *start) {
     }
 }
 
+int Lex::ScanCharLiteral(void) {
+    UCC_WC_T ch = 0;
+    size_t n = 0;
+    int count = 0;
+    int wide = 0;
+    
+    // wide char L'a' L'\t'   
+    if (*CURSOR == 'L') {
+        CURSOR++;
+        wide = 1;
+    }
+    CURSOR++;                       // skip \'
+    if(*CURSOR == '\'') {
+        Error(&TokenCoord, "empty character constant");
+    } else if (*CURSOR == '\n' || IS_EOF(CURSOR)) {
+        Error(&TokenCoord,"missing terminating ' character");
+    } else {
+        if(*CURSOR == '\\'){
+            ch = (UCC_WC_T) ScanEscapeChar(wide);
+        } else {
+            if(wide) {
+                n = mbrtowc(&ch, CURSOR, MB_CUR_MAX, 0);
+                if(n > 0) {
+                    CURSOR += n;
+                }
+                // PRINT_DEBUG_INFO(("%x %x",n,ch));
+            } else {
+                ch = *CURSOR;
+                CURSOR++;
+            }
+        }
+
+        // L'abc',  skip the redundant characters
+        while (*CURSOR != '\'') {
+            if (*CURSOR == '\n' || IS_EOF(CURSOR))
+                break;
+            CURSOR++;
+            count++;
+        }
+    }
+
+    if (*CURSOR != '\'') {
+        Error(&TokenCoord, "missing terminating ' character");
+        goto end_char;
+    }
+
+    CURSOR++;
+    if (count > 0) {
+        Warning(&TokenCoord, "Two many characters");
+    }
+
+end_char:
+    TokenValue.i[0] = ch;
+    TokenValue.i[1] = 0;
+
+    return TK_INTCONST;
+}
+
+
+// "abc"  or L"abc"
+int Lexer::ScanStringLiteral(void) {
+    char tmp[512];
+    char *cp = tmp;
+    UCC_WC_T *wcp = (UCC_WC_T *)tmp;
+    int wide = 0;
+    int len = 0;
+    int maxlen = 512;
+    UCC_WC_T ch = 0;
+    String str;
+    size_t n = 0;
+
+    CALLOC(str);
+
+    if (*CURSOR == 'L') {
+        CURSOR++;
+        wide = 1;
+        // char tmp[512] --> int tmp[512/sizeof(int)]
+        maxlen /= sizeof(UCC_WC_T);
+    }
+    CURSOR++;    // skip "
+
+next_string:
+    while (*CURSOR != '"') {
+        if (*CURSOR == '\n' || IS_EOF(CURSOR))
+            break;
+        if(*CURSOR == '\\') {
+            ch =  (UCC_WC_T)ScanEscapeChar(wide);
+        } else {
+            if(wide) {
+                n = mbrtowc(&ch, CURSOR, MB_CUR_MAX, 0);
+                if(n > 0) {
+                    CURSOR += n;
+                } else {
+                    ch = *CURSOR;
+                    CURSOR++;
+                }
+                // PRINT_DEBUG_INFO(("%x %x",n,ch));
+            } else {
+                ch = *CURSOR;
+                CURSOR++;
+            }
+        }
+        if (wide) {
+            wcp[len] = ch;
+        } else {
+            cp[len] = (char)ch;
+        }
+        len++;
+        if (len >= maxlen) {
+            AppendSTR(str, tmp, len, wide);
+            len = 0;
+        }
+    }
+
+    if (*CURSOR != '"') {
+        Error(&TokenCoord, "Expect \"");
+        goto end_string;
+    }
+
+    URSOR++;               // skip "
+    SkipWhiteSpace();
+    // "abc"                "123"   ---> "abc123"
+    if (CURSOR[0] == '"') {
+        if (wide == 1) {
+            Error(&TokenCoord, "String wideness mismatch");
+        }
+        CURSOR++;
+        goto next_string;
+    // L"abc"       L"123"  --> L"abc123"
+    } else if (CURSOR[0] == 'L' && CURSOR[1] == '"') {
+        if (wide == 0) {
+            Error(&TokenCoord, "String wideness mismatch");
+        }
+        CURSOR += 2;
+        goto next_string;
+    }
+
+end_string:
+    AppendSTR(str, tmp, len, wide);
+    TokenValue.p = str;
+
+    return wide ? TK_WIDESTRING : TK_STRING;
+}
+
