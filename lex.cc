@@ -1,34 +1,26 @@
 #include "lex.h"
 #include "keyword.h"
+#include "input.h"
+#include "str.h"
+#include "error.h"
+#include "vector.h"
+#include "type.h"
+#include "common.h"
+#include "alloc.h"
+
+#include <string.h>
+#include <errno.h>
+#include <wchar.h>
 
 #define CURSOR      (Input.cursor)
 #define LINE        (Input.line)
 #define LINEHEAD    (Input.lineHead)
 
 
-int Lexer::GetNextToken(void) {
-    int tok;
+#define IS_EOF(cur)      (*(cur) == END_OF_FILE && ((cur)-Input.base) == Input.size)
 
-    PrevCoord = TokenCoord;
-    SkipWhiteSpace();
-    TokenCoord.line = LINE; // line number in the *.i for C compiler
-    TokenCoord.col  = (int)(CURSOR - LINEHEAD + 1);
-    // use function pointer table to avoid a large switch statement.
-    tok = (*Scanners[*CURSOR])();
-    return tok;
-}
 
-void Lexer::BeginPeekToken(void) {
-    PeekPoint = CURSOR;
-    PeekValue = TokenValue;
-    PeekCoord = TokenCoord;
-}
-
-void Lexer::EndPeekToken(void) {
-    CURSOR = PeekPoint;
-    TokenValue = PeekValue;
-    TokenCoord = PeekCoord;
-}
+extern Vector ExtraWhiteSpace;
 
 /**
  * Scans preprocessing directive which specify the line number and filename such as:
@@ -58,7 +50,7 @@ void Lexer::ScanPPLine(void) {
         goto read_line;
     }
     // # line 6 "C:\\Program Files\\Visual Stduio 6\\VC6\\Include\\stdio.h"         on Windows
-    else if (strncmp(CURSOR, "line", 4) == 0) {
+    else if (strncmp((const char *)CURSOR, "line", 4) == 0) {
         CURSOR += 4;
         while (*CURSOR == ' ' || *CURSOR == '\t') {
             CURSOR++;
@@ -76,7 +68,7 @@ read_line:
             CURSOR++;
         }
         //get the filename: "hello.c " --->  hello.c
-        TokenCoord.filename = ++CURSOR;
+        TokenCoord.filename = (char *)(++CURSOR);
         while (*CURSOR != '"' && !IS_EOF(CURSOR)&& *CURSOR != '\n') {
             CURSOR++;
         }
@@ -149,7 +141,7 @@ again:
         char *p;
         // ignore the unknown strings, that is , ExtraWhiteSpace.
         FOR_EACH_ITEM(char*, p, ExtraWhiteSpace)
-            if (strncmp(CURSOR, p, strlen(p)) == 0) {
+            if (strncmp((const char *)CURSOR, p, strlen(p)) == 0) {
                 CURSOR += strlen(p);
                 goto again;
             }
@@ -433,7 +425,7 @@ int Lexer::ScanFloatLiteral(unsigned char *start) {
     }
 }
 
-int Lex::ScanCharLiteral(void) {
+int Lexer::ScanCharLiteral(void) {
     UCC_WC_T ch = 0;
     size_t n = 0;
     int count = 0;
@@ -454,7 +446,7 @@ int Lex::ScanCharLiteral(void) {
             ch = (UCC_WC_T) ScanEscapeChar(wide);
         } else {
             if(wide) {
-                n = mbrtowc(&ch, CURSOR, MB_CUR_MAX, 0);
+                n = mbrtowc((wchar_t *)&ch, (const char *)CURSOR, MB_CUR_MAX, 0);
                 if(n > 0) {
                     CURSOR += n;
                 }
@@ -575,5 +567,276 @@ end_string:
     TokenValue.p = str;
 
     return wide ? TK_WIDESTRING : TK_STRING;
+}
+
+// parse string starting with char
+int Lexer::ScanIdentifier(void) {
+    unsigned char *start = CURSOR;
+    int tok;
+
+    // special case :  wide char/string
+    if (*CURSOR == 'L') {
+        if (CURSOR[1] == '\'') {
+            return ScanCharLiteral();               // L'a' wide char
+        }
+        if (CURSOR[1] == '"') {
+            return ScanStringLiteral();     //      L"wide string"
+        }
+    }
+
+    // lettter(letter|digit)*
+    CURSOR++;
+    while (IsLetterOrDigit(*CURSOR)) {
+        CURSOR++;
+    }
+
+    tok = FindKeyword((char *)start, (int)(CURSOR - start));
+    if (tok == TK_ID) {
+        TokenValue.p = InternName((char *)start, (int)(CURSOR - start));
+    }
+
+    return tok;
+}
+
+int Lexer::ScanPlus(void) {
+    CURSOR++;
+    if (*CURSOR == '+') {
+        CURSOR++;
+        return TK_INC;                  // ++
+    }
+    else if (*CURSOR == '=') {
+        CURSOR++;
+        return TK_ADD_ASSIGN;   // +=
+    } else {
+        return TK_ADD;                  // +
+    }
+}
+
+int Lexer::ScanMinus(void) {
+    CURSOR++;
+    if (*CURSOR == '-') {
+        CURSOR++;
+        return TK_DEC;                  // --
+    } else if (*CURSOR == '=') {
+        CURSOR++;
+        return TK_SUB_ASSIGN;   // -=
+    } else if (*CURSOR == '>') {
+        CURSOR++;
+        return TK_POINTER;              // ->
+    } else {
+        return TK_SUB;                  // -
+    }
+}
+
+int Lexer::ScanStar(void) {
+    CURSOR++;
+    if (*CURSOR == '=') {
+        CURSOR++;
+        return TK_MUL_ASSIGN;           // *=
+    } else {
+        return TK_MUL;                  // *
+    }
+}
+
+int Lexer::ScanSlash(void) {
+    CURSOR++;
+    if (*CURSOR == '=') {
+        CURSOR++;
+        return TK_DIV_ASSIGN;           //       /=
+    } else {
+        return TK_DIV;                          //              /
+    }
+}
+
+int Lexer::ScanPercent(void) {
+    CURSOR++;
+    if (*CURSOR == '=') {
+        CURSOR++;
+        return TK_MOD_ASSIGN;           // %=
+    } else {
+        return TK_MOD;                          // %
+    }
+}
+
+int Lexer::ScanLess(void) {
+    CURSOR++;
+    if (*CURSOR == '<') {
+        CURSOR++;
+        if (*CURSOR == '=') {
+            CURSOR++;
+            return TK_LSHIFT_ASSIGN;                // <<=
+        }
+        return TK_LSHIFT;               // <<
+    } else if (*CURSOR == '=') {
+        CURSOR++;
+        return TK_LESS_EQ;              // <=
+    } else {
+        return TK_LESS;                 // <
+    }
+}
+
+int Lexer::ScanGreat(void) {
+    CURSOR++;
+    if (*CURSOR == '>') {
+        CURSOR++;
+        // >>=
+        if (*CURSOR == '=') {
+                CURSOR++;
+                return TK_RSHIFT_ASSIGN;
+        }
+        return TK_RSHIFT;               // >>
+    } else if (*CURSOR == '=') {
+        CURSOR++;
+        return TK_GREAT_EQ;                     // >=
+    } else {
+        return TK_GREAT;                // >
+    }
+}
+
+int Lexer::ScanExclamation(void) {
+    CURSOR++;
+
+    // !=
+    if (*CURSOR == '=') {
+        CURSOR++;
+        return TK_UNEQUAL;
+    // !
+    } else {
+        return TK_NOT;
+    }
+}
+
+int Lexer::ScanEqual(void) {
+    CURSOR++;
+    // ==
+    if (*CURSOR == '=') {
+        CURSOR++;
+        return TK_EQUAL;
+    // =
+    } else {
+        return TK_ASSIGN;
+    }
+}
+
+int Lexer::ScanBar(void) {
+    CURSOR++;
+    // ||
+    if (*CURSOR == '|') {
+        CURSOR++;
+        return TK_OR;
+    // |=
+    } else if (*CURSOR == '=') {
+        CURSOR++;
+        return TK_BITOR_ASSIGN;
+    // |
+    } else {
+        return TK_BITOR;
+    }
+}
+
+int Lexer::ScanAmpersand(void) {
+    CURSOR++;
+    // &&
+    if (*CURSOR == '&') {
+        CURSOR++;
+        return TK_AND;
+    // &=
+    } else if (*CURSOR == '=') {
+        CURSOR++;
+        return TK_BITAND_ASSIGN;
+    // &
+    } else {
+        return TK_BITAND;
+    }
+}
+
+// ^    exclusive or
+int Lexer::ScanCaret(void) {
+    CURSOR++;
+    if (*CURSOR == '=') {
+        CURSOR++;
+        return TK_BITXOR_ASSIGN;
+    } else {
+        return TK_BITXOR;
+    }
+}
+
+int Lexer::ScanDot(void) {
+    // .123         float number
+    if (IsDigit(CURSOR[1])) {
+        return ScanFloatLiteral(CURSOR);
+    //  ...         variable parameters.
+    } else if (CURSOR[1] == '.' && CURSOR[2] == '.') { 
+        CURSOR += 3;
+        return TK_ELLIPSIS;
+    // just a simple dot
+    } else {
+        CURSOR++;
+        return TK_DOT;
+    }
+}
+
+#define SINGLE_CHAR_SCANNER(t) \
+static int Scan##t(void)       \
+{                              \
+    CURSOR++;                  \
+    return TK_##t;             \
+}
+
+SINGLE_CHAR_SCANNER(LBRACE)
+SINGLE_CHAR_SCANNER(RBRACE)
+SINGLE_CHAR_SCANNER(LBRACKET)
+SINGLE_CHAR_SCANNER(RBRACKET)
+SINGLE_CHAR_SCANNER(LPAREN)
+SINGLE_CHAR_SCANNER(RPAREN)
+SINGLE_CHAR_SCANNER(COMMA)
+SINGLE_CHAR_SCANNER(SEMICOLON)
+SINGLE_CHAR_SCANNER(COMP)
+SINGLE_CHAR_SCANNER(QUESTION)
+SINGLE_CHAR_SCANNER(COLON)
+
+//      illegal character
+int Lexer::ScanBadChar(void) {
+    Error(&TokenCoord, "illegal character:\\x%x", *CURSOR);
+    /*********************************************
+            move CURSOR a step forward, 
+            because GetNextToken() doesn't move CURSOR in this case.
+     *********************************************/
+    CURSOR++;
+    return GetNextToken();
+}
+
+int Lexer::ScanEOF(void) {
+    if(!IS_EOF(CURSOR)) {
+        return ScanBadChar();
+    }
+    return TK_END;
+}
+
+
+int Lexer::GetNextToken(void) {
+    int tok;
+
+    PrevCoord = TokenCoord;
+    SkipWhiteSpace();
+    TokenCoord.line = LINE; // line number in the *.i for C compiler
+    TokenCoord.col  = (int)(CURSOR - LINEHEAD + 1);
+    // use function pointer table to avoid a large switch statement.
+    tok = (*Scanners[*CURSOR])();
+    return tok;
+}
+
+// mark()
+void Lexer::BeginPeekToken(void) {
+    PeekPoint = CURSOR;
+    PeekValue = TokenValue;
+    PeekCoord = TokenCoord;
+}
+
+// reset()
+void Lexer::EndPeekToken(void) {
+    CURSOR = PeekPoint;
+    TokenValue = PeekValue;
+    TokenCoord = PeekCoord;
 }
 

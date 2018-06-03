@@ -1,6 +1,9 @@
 #ifndef __LEX_H_
 #define __LEX_H_
 
+#include "alloc.h"
+
+extern Heap CurrentHeap;
 
 const char* TokenStrings[] =
 {
@@ -41,7 +44,7 @@ union value
 typedef int (*Scanner)(void);
 
 
-class Lexer() {
+class Lexer {
 
   public:
       Lexer();
@@ -80,14 +83,12 @@ class Lexer() {
       
       Scanner Scanners[256];
       unsigned char *CURSOR;
-}
+};
 
-/*
 extern union value  TokenValue;
 extern struct coord TokenCoord;
 extern struct coord PrevCoord;
-extern char* TokenStrings[];
-*/
+//extern char* TokenStrings[];
 
 
 

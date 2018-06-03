@@ -1,6 +1,7 @@
 #ifndef __ERROR_H_
 #define __ERROR_H_
 
+#include "input.h"
 
 void Do_Error(Coord coord, const char *format, ...);
 void Do_Fatal(const char *format, ...);
