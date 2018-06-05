@@ -1,4 +1,3 @@
-#include "ucl.h"
 
 void Do_Error(Coord coord, const char *format, ...)
 {

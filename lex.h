@@ -1,6 +1,7 @@
 #ifndef __LEX_H_
 #define __LEX_H_
 
+#include "input.h"
 #include "alloc.h"
 
 extern Heap CurrentHeap;
@@ -81,14 +82,16 @@ class Lexer {
       int ScanBadChar(void);
       int ScanEOF(void);
       
-      Scanner Scanners[256];
       unsigned char *CURSOR;
+      unsigned char *PeekPoint;
+      union value    PeekValue;
+      struct coord   PeekCoord;
+      union value  TokenValue;
+      struct coord TokenCoord;
+      struct coord PrevCoord;
+      Scanner Scanners[256];
 };
 
-extern union value  TokenValue;
-extern struct coord TokenCoord;
-extern struct coord PrevCoord;
-//extern char* TokenStrings[];
 
 
 

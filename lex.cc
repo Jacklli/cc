@@ -249,7 +249,7 @@ int Lexer::FindKeyword(char *str, int len) {
     return p->tok;
 }
 
-static int ScanIntLiteral(unsigned char *start, int len, int base) {
+int Lexer::ScanIntLiteral(unsigned char *start, int len, int base) {
     unsigned char *p =  start;
     unsigned char *end = start + len;
     unsigned int i[2] = {0, 0};
@@ -496,7 +496,8 @@ int Lexer::ScanStringLiteral(void) {
     String str;
     size_t n = 0;
 
-    CALLOC(str);
+
+    str = (String)HeapAllocate(CurrentHeap, sizeof(str));
 
     if (*CURSOR == 'L') {
         CURSOR++;
@@ -514,7 +515,7 @@ next_string:
             ch =  (UCC_WC_T)ScanEscapeChar(wide);
         } else {
             if(wide) {
-                n = mbrtowc(&ch, CURSOR, MB_CUR_MAX, 0);
+                n = mbrtowc((wchar_t *)&ch, (const char *)CURSOR, MB_CUR_MAX, 0);
                 if(n > 0) {
                     CURSOR += n;
                 } else {
@@ -544,7 +545,7 @@ next_string:
         goto end_string;
     }
 
-    URSOR++;               // skip "
+    CURSOR++;               // skip "
     SkipWhiteSpace();
     // "abc"                "123"   ---> "abc123"
     if (CURSOR[0] == '"') {
