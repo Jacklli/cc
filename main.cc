@@ -1,9 +1,12 @@
 
+#include "input.h"
+#include "vector.h"
+#include "type.h"
+#include "alloc.h"
 
-#include <iostream>
-#include "lex.h"
+int main () {
 
-int main() {
-    std::cout << "test" << std::endl;
     return 0;
 }
+
+Heap CurrentHeap;

@@ -1,7 +1,15 @@
-#include "ucl.h"
-#include "output.h"
+
+
+#include "input.h"
+#include "vector.h"
 #include "type.h"
 #include "config.h"
+#include "alloc.h"
+#include "lex.h"
+
+#include <string.h>
+
+
 // primary type: CHAR, ..., DOUBLE, ... , POINTER,VOID.  
 // in fact, POINTER should be considered as a kind of type operator ?
 struct type Types[VOID - CHAR + 1];
@@ -450,7 +458,7 @@ Type Enum(char *id)
 {
 	EnumType ety;
 
-	ALLOC(ety);
+        memset(HeapAllocate(CurrentHeap, sizeof *(ety)), 0, sizeof *(ety));
 
 	ety->categ = ENUM;
 	ety->id = id;

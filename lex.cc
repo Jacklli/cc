@@ -20,7 +20,7 @@
 #define IS_EOF(cur)      (*(cur) == END_OF_FILE && ((cur)-Input.base) == Input.size)
 
 
-extern Vector ExtraWhiteSpace;
+Vector ExtraWhiteSpace;
 
 /**
  * Scans preprocessing directive which specify the line number and filename such as:
@@ -493,11 +493,11 @@ int Lexer::ScanStringLiteral(void) {
     int len = 0;
     int maxlen = 512;
     UCC_WC_T ch = 0;
-    String str;
+    CC_String str;
     size_t n = 0;
 
 
-    str = (String)HeapAllocate(CurrentHeap, sizeof(str));
+    str = (CC_String)HeapAllocate(CurrentHeap, sizeof(str));
 
     if (*CURSOR == 'L') {
         CURSOR++;

@@ -6,8 +6,8 @@ INCLUDES = -I .
 CXXFLAGS = -std=c++11 -g -O0
 
 all: $(OBJS)
-	$(CC) $(CXXFLAGS) $^ -o ${TARGET} $(INCLUDES)
+	$(CC) $(CXXFLAGS) $^ -g -o $(TARGET) $(INCLUDES)
 
 
 clean:
-	rm -rf *.o $(TARGET)
+	rm -rf *.o a.out $(TARGET)

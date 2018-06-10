@@ -6,7 +6,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-
 HEAP(StringHeap);
 
 static NameBucket NameBuckets[NAME_HASH_MASK + 1];
@@ -75,7 +74,7 @@ char* InternName(char *id, int len)
  * appends the characters or wide characters in tmp to the string str and adds a terminating 
  * '\0' or L'\0'
  */
-void AppendSTR(String str, char *tmp, int len, int wide)
+void AppendSTR(CC_String str, char *tmp, int len, int wide)
 {
 
 	int i, size;

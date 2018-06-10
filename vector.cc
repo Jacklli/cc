@@ -1,4 +1,10 @@
-#include "ucl.h"
+
+#include "vector.h"
+#include "alloc.h"
+#include "lex.h"
+
+#include <stdio.h>
+#include <string.h>
 
 /**
  * Create a vector with the given size
@@ -8,7 +14,7 @@ Vector CreateVector(int size)
 {
 	Vector v = NULL;
 	// allocate a struct vector object from Heap
-	ALLOC(v);
+	memset((Vector)HeapAllocate(CurrentHeap, sizeof *v), 0, sizeof *v);
 	// allocate @size slots for the vector object
 	v->data = (void **)HeapAllocate(CurrentHeap, size * sizeof(void *));
 	v->size = size;
@@ -25,7 +31,7 @@ void ExpandVector(Vector v)
 	void *orig;
 
 	orig = v->data;
-	v->data = HeapAllocate(CurrentHeap, v->size * 2 * sizeof(void *));
+	v->data = (void **)HeapAllocate(CurrentHeap, v->size * 2 * sizeof(void *));
 	memcpy(v->data, orig, v->size * sizeof(void *));
 	v->size *= 2;
 }

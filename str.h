@@ -12,12 +12,12 @@ typedef struct string
 {
 	char *chs;
 	int len;
-} *String;
+} *CC_String;
 
 #define NAME_HASH_MASK 1023
 
 char* InternName(char *id, int len);
-void AppendSTR(String str, char *tmp, int len, int wide);
+void AppendSTR(CC_String str, char *tmp, int len, int wide);
 
 #endif
 

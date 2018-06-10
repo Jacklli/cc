@@ -1,4 +1,12 @@
 
+#include "error.h"
+#include "stdarg.h"
+
+#include <stdlib.h>
+
+int ErrorCount;
+int WarningCount;
+
 void Do_Error(Coord coord, const char *format, ...)
 {
 	va_list ap;
